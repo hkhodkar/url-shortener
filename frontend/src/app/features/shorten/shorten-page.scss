@@ -1,0 +1,98 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.input-addon .input-status {
+  flex: 1;
+  min-width: 0;
+
+  .input {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+}
+
+.status {
+  color: var(--text-muted);
+
+  .ok {
+    color: var(--success);
+  }
+
+  .bad {
+    color: var(--danger);
+  }
+}
+
+.field-hint .field-error {
+  margin: 0;
+}
+
+.form-error {
+  margin-top: 20px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+
+  .btn {
+    min-width: 160px;
+  }
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 24px;
+
+  h2 {
+    font-size: 17px;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    app-icon {
+      color: var(--success);
+    }
+  }
+}
+
+.illustration {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 6px;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .form-actions .btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,295 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+
+  .search {
+    flex: 1 1 280px;
+  }
+
+  .select {
+    flex: 0 0 180px;
+    width: 180px;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  transition: opacity 0.15s ease;
+
+  &.loading {
+    opacity: 0.55;
+  }
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 24px;
+  padding: 22px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.links-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  th,
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    height: 44px;
+    background: var(--surface-muted);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  th:first-child,
+  td:first-child {
+    padding-left: 20px;
+  }
+
+  th:nth-child(1) {
+    width: 32%;
+  }
+
+  th:nth-child(2) {
+    width: 28%;
+  }
+
+  th:nth-child(3) {
+    width: 90px;
+  }
+
+  th:nth-child(4) {
+    width: 120px;
+  }
+
+  th:nth-child(5) {
+    width: 110px;
+  }
+
+  th:nth-child(6) {
+    width: 124px;
+  }
+
+  tbody tr:hover {
+    background: var(--surface-hover);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.num-col {
+  text-align: right !important;
+
+  .sort {
+    flex-direction: row-reverse;
+  }
+}
+
+.link-cell {
+  .title {
+    display: block;
+    overflow: hidden;
+    color: var(--text);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+
+  .short {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    margin: 2px 0 -6px;
+    color: var(--primary);
+    font-size: 13px;
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+.target {
+  display: block;
+  max-width: 100%;
+  color: var(--text-muted);
+}
+
+.clicks-cell {
+  font-weight: 600;
+
+  .cell-label {
+    display: none;
+  }
+}
+
+.created-cell {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.actions-cell {
+  white-space: nowrap;
+  text-align: right !important;
+}
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border);
+
+  app-pagination {
+    flex: 1;
+    border-top: 0;
+  }
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+
+  .select {
+    width: 76px;
+    height: 34px;
+  }
+}
+
+// cards instead of a table on small screens
+@media (max-width: 860px) {
+  .toolbar {
+    padding: 14px 16px;
+
+    .select {
+      flex: 1 1 140px;
+      width: auto;
+    }
+  }
+
+  .links-table {
+    table-layout: auto;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        'link status'
+        'target target'
+        'meta actions';
+      gap: 6px 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr:last-child {
+      border-bottom: 0;
+    }
+
+    td,
+    td:first-child {
+      padding: 0;
+      border: 0;
+    }
+
+    .link-cell {
+      grid-area: link;
+    }
+
+    .status-cell {
+      grid-area: status;
+    }
+
+    .target-cell {
+      grid-area: target;
+      min-width: 0;
+      font-size: 13px;
+    }
+
+    .clicks-cell {
+      grid-area: meta;
+      align-self: center;
+      text-align: left !important;
+
+      .cell-label {
+        display: inline;
+        margin-left: 4px;
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+    }
+
+    .created-cell {
+      display: none;
+    }
+
+    .actions-cell {
+      grid-area: actions;
+      margin: -4px -8px -6px 0;
+    }
+  }
+
+  .footer-row {
+    flex-wrap: wrap;
+  }
+
+  .page-size {
+    padding: 12px 0 0 16px;
+  }
+
+  .footer-row app-pagination {
+    padding: 12px 16px;
+  }
+}

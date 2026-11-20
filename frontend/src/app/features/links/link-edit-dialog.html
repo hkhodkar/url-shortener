@@ -1,0 +1,95 @@
+<app-modal title="Edit link" [width]="560" (closed)="close()">
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="modal-body">
+      <p class="short">Short link <strong>{{ displayUrl(link().short_url) }}</strong> stays the same.</p>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label for="edit-target">Destination URL</label>
+          <input
+            id="edit-target"
+            class="input"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            formControlName="target_url"
+          />
+          @if (showError('target_url')) {
+            <span class="field-error">
+              @if (form.controls.target_url.hasError('required')) {
+                Enter the destination URL
+              } @else if (form.controls.target_url.hasError('maxlength')) {
+                The URL is too long
+              } @else {
+                {{ form.controls.target_url.errors?.['url'] }}
+              }
+            </span>
+          }
+        </div>
+
+        <div class="field full">
+          <label for="edit-title">Title <span class="optional">(optional)</span></label>
+          <input
+            id="edit-title"
+            class="input"
+            type="text"
+            maxlength="120"
+            placeholder="Shown in your links list"
+            formControlName="title"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="edit-expiry">Expires on <span class="optional">(optional)</span></label>
+          <div class="date-row">
+            <input
+              id="edit-expiry"
+              class="input"
+              type="date"
+              [min]="today"
+              formControlName="expires_on"
+            />
+            @if (form.controls.expires_on.value) {
+              <button type="button" class="btn" (click)="clearExpiry()">No expiry</button>
+            }
+          </div>
+          @if (showError('expires_on')) {
+            <span class="field-error">Pick today or a later date</span>
+          } @else if (link().status === 'expired' && form.controls.expires_on.pristine) {
+            <span class="field-hint">
+              Expired on {{ formatDate(link().expires_at) }}. Pick a new date or remove it to bring
+              the link back.
+            </span>
+          }
+        </div>
+
+        <div class="field full">
+          <label class="switch-row" for="edit-active">
+            <span>
+              <strong>Link is active</strong>
+              <span class="desc">Turned off links answer with “410 Gone” instead of redirecting.</span>
+            </span>
+            <span class="switch">
+              <input id="edit-active" type="checkbox" role="switch" formControlName="is_active" />
+              <span class="track"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      @if (error()) {
+        <p class="form-error" role="alert">{{ error() }}</p>
+      }
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="btn" (click)="close()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        @if (saving()) {
+          <span class="spinner"></span>
+        }
+        Save changes
+      </button>
+    </footer>
+  </form>
+</app-modal>

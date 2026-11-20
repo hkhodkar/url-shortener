@@ -1,0 +1,206 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Links</h1>
+      <p>Every short link you created, with its clicks and status.</p>
+    </div>
+    <div class="page-actions">
+      <a routerLink="/new" class="btn btn-primary">
+        <app-icon name="plus" [size]="16" />
+        New link
+      </a>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="toolbar">
+      <div class="input-icon search">
+        <app-icon class="icon" name="search" [size]="16" />
+        <input
+          class="input"
+          type="search"
+          placeholder="Search title, alias or URL"
+          aria-label="Search links"
+          [formControl]="search"
+        />
+      </div>
+      <select class="select" aria-label="Filter by status" [value]="query().status ?? ''" (change)="setStatus($event)">
+        <option value="">All statuses</option>
+        @for (status of statuses; track status) {
+          <option [value]="status" [selected]="query().status === status">
+            {{ status === 'active' ? 'Active' : status === 'expired' ? 'Expired' : 'Disabled' }}
+          </option>
+        }
+      </select>
+      <select class="select" aria-label="Sort links" (change)="setSort($event)">
+        @for (option of sortOptions; track option.value) {
+          <option [value]="option.value" [selected]="query().sort === option.value">
+            {{ option.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    @if (links.state().error && !page()) {
+      <div class="error-state" role="alert">
+        <app-icon name="alert" [size]="24" />
+        <p>{{ links.state().error }}</p>
+        <button type="button" class="btn" (click)="links.reload()">Try again</button>
+      </div>
+    } @else if (!page()) {
+      <div class="table-wrap" aria-busy="true">
+        @for (row of skeletonRows; track row) {
+          <div class="skeleton-row">
+            <span class="skeleton" style="width: 28%; height: 14px"></span>
+            <span class="skeleton" style="width: 30%; height: 14px"></span>
+            <span class="skeleton" style="width: 10%; height: 14px"></span>
+            <span class="skeleton" style="width: 12%; height: 14px"></span>
+          </div>
+        }
+      </div>
+    } @else if (page()!.items.length === 0) {
+      <div class="empty">
+        <app-icon name="link" [size]="28" />
+        @if (filtered()) {
+          <h3>No links match</h3>
+          <p>Try another search or status.</p>
+          <button type="button" class="btn btn-sm" (click)="clearFilters()">Clear filters</button>
+        } @else {
+          <h3>No links yet</h3>
+          <p>Shorten your first URL to see it here.</p>
+          <a routerLink="/new" class="btn btn-primary btn-sm">Shorten a link</a>
+        }
+      </div>
+    } @else {
+      <div class="table-wrap" [class.loading]="links.state().loading">
+        <table class="links-table">
+          <thead>
+            <tr>
+              <th scope="col" [attr.aria-sort]="ariaSort('title')">
+                <button type="button" class="sort" (click)="sortBy('title')">
+                  Link
+                  @if (sortIcon('title'); as icon) {
+                    <app-icon [name]="icon" [size]="14" />
+                  }
+                </button>
+              </th>
+              <th scope="col">Destination</th>
+              <th scope="col" class="num-col" [attr.aria-sort]="ariaSort('clicks')">
+                <button type="button" class="sort" (click)="sortBy('clicks')">
+                  Clicks
+                  @if (sortIcon('clicks'); as icon) {
+                    <app-icon [name]="icon" [size]="14" />
+                  }
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="ariaSort('created_at')">
+                <button type="button" class="sort" (click)="sortBy('created_at')">
+                  Created
+                  @if (sortIcon('created_at'); as icon) {
+                    <app-icon [name]="icon" [size]="14" />
+                  }
+                </button>
+              </th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (link of page()!.items; track link.id) {
+              <tr>
+                <td class="link-cell">
+                  <a class="title" [routerLink]="['/links', link.code]">
+                    {{ link.title || displayUrl(link.target_url) }}
+                  </a>
+                  <span class="short">
+                    <span class="mono truncate">{{ displayUrl(link.short_url) }}</span>
+                    <app-copy-button [text]="link.short_url" [compact]="true" />
+                  </span>
+                </td>
+                <td class="target-cell">
+                  <a
+                    class="target truncate"
+                    [href]="link.target_url"
+                    target="_blank"
+                    rel="noopener"
+                    [appTooltip]="link.target_url"
+                  >
+                    {{ displayUrl(link.target_url) }}
+                  </a>
+                </td>
+                <td class="num-col clicks-cell">
+                  <span class="num">{{ formatNumber(link.clicks) }}</span>
+                  <span class="cell-label">clicks</span>
+                </td>
+                <td class="created-cell">
+                  <span [appTooltip]="formatDateTime(link.created_at)">{{ relativeTime(link.created_at) }}</span>
+                </td>
+                <td class="status-cell"><app-status-badge [status]="link.status" /></td>
+                <td class="actions-cell">
+                  <a
+                    class="icon-btn"
+                    [routerLink]="['/links', link.code]"
+                    aria-label="View stats"
+                    title="View stats"
+                  >
+                    <app-icon name="bar-chart" [size]="16" />
+                  </a>
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    aria-label="Edit link"
+                    title="Edit"
+                    (click)="edit(link)"
+                  >
+                    <app-icon name="pencil" [size]="16" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn danger"
+                    aria-label="Delete link"
+                    title="Delete"
+                    (click)="askDelete(link)"
+                  >
+                    <app-icon name="trash" [size]="16" />
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer-row">
+        <label class="page-size">
+          Rows
+          <select class="select" (change)="setPageSize($event)">
+            @for (size of pageSizes; track size) {
+              <option [value]="size" [selected]="query().page_size === size">{{ size }}</option>
+            }
+          </select>
+        </label>
+        <app-pagination
+          [page]="page()!.page"
+          [pageSize]="page()!.page_size"
+          [total]="page()!.total"
+          (pageChange)="setPage($event)"
+        />
+      </div>
+    }
+  </section>
+</div>
+
+@if (editing(); as link) {
+  <app-link-edit-dialog [link]="link" (saved)="onSaved($event)" (closed)="closeEdit()" />
+}
+
+@if (deleting(); as link) {
+  <app-confirm-dialog
+    title="Delete this link?"
+    [message]="deleteMessage(link)"
+    confirmLabel="Delete link"
+    [busy]="busy()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

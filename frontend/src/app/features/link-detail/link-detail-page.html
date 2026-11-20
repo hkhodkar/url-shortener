@@ -1,0 +1,230 @@
+<div class="page">
+  <a routerLink="/links" class="back-link">
+    <app-icon name="arrow-left" [size]="16" />
+    All links
+  </a>
+
+  @if (notFound()) {
+    <section class="card empty">
+      <app-icon name="link" [size]="28" />
+      <h3>Link not found</h3>
+      <p>There is no short link with the code “{{ code() }}”. It may have been deleted.</p>
+      <a routerLink="/links" class="btn btn-sm">Back to links</a>
+    </section>
+  } @else if (link.state().error && !link.value()) {
+    <section class="card error-state" role="alert">
+      <app-icon name="alert" [size]="24" />
+      <p>{{ link.state().error }}</p>
+      <button type="button" class="btn" (click)="link.reload()">Try again</button>
+    </section>
+  } @else if (link.value(); as l) {
+    <section class="card summary">
+      <div class="summary-main">
+        <div class="title-row">
+          <h1>{{ l.title || displayUrl(l.target_url) }}</h1>
+          <app-status-badge [status]="l.status" />
+        </div>
+        <div class="short-row">
+          <a class="short-url mono" [href]="l.short_url" target="_blank" rel="noopener">
+            {{ displayUrl(l.short_url) }}
+          </a>
+          <app-copy-button [text]="l.short_url" [compact]="true" />
+        </div>
+        <p class="target">
+          <app-icon name="referrer" [size]="14" />
+          <a class="truncate" [href]="l.target_url" target="_blank" rel="noopener" [appTooltip]="l.target_url">
+            {{ l.target_url }}
+          </a>
+        </p>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn" (click)="openEdit()">
+          <app-icon name="pencil" [size]="16" />
+          Edit
+        </button>
+        <button type="button" class="btn" [disabled]="busy()" (click)="toggleActive(l)">
+          <app-icon name="power" [size]="16" />
+          {{ l.is_active ? 'Turn off' : 'Turn on' }}
+        </button>
+        <button type="button" class="btn danger-outline" (click)="askDelete()">
+          <app-icon name="trash" [size]="16" />
+          Delete
+        </button>
+      </div>
+    </section>
+
+    <div class="range-row">
+      <h2>Performance</h2>
+      <div class="segmented" role="radiogroup" aria-label="Date range">
+        @for (r of ranges; track r) {
+          <label>
+            <input
+              type="radio"
+              name="range"
+              [value]="r"
+              [checked]="days() === r"
+              (change)="setRange(r)"
+            />
+            {{ r }} days
+          </label>
+        }
+      </div>
+    </div>
+
+    @if (stats.value(); as s) {
+      <div class="kpis" [class.loading]="stats.state().loading">
+        <div class="card kpi">
+          <span class="label"><span class="kpi-icon"><app-icon name="pointer" [size]="15" /></span>Clicks</span>
+          <span class="value">{{ formatNumber(s.total_clicks) }}</span>
+          <span class="meta">last {{ s.range }} days</span>
+        </div>
+        <div class="card kpi">
+          <span class="label"><span class="kpi-icon teal"><app-icon name="users" [size]="15" /></span>Unique visitors</span>
+          <span class="value">{{ formatNumber(s.unique_visitors) }}</span>
+          <span class="meta">by browser and network</span>
+        </div>
+        <div class="card kpi">
+          <span class="label"><span class="kpi-icon amber"><app-icon name="trending" [size]="15" /></span>Daily average</span>
+          <span class="value">{{ dailyAverage() }}</span>
+          <span class="meta">clicks per day</span>
+        </div>
+        <div class="card kpi">
+          <span class="label"><span class="kpi-icon pink"><app-icon name="eye" [size]="15" /></span>All-time clicks</span>
+          <span class="value">{{ formatNumber(s.all_time_clicks) }}</span>
+          <span class="meta">
+            @if (l.last_clicked_at) {
+              last {{ relativeTime(l.last_clicked_at) }}
+            } @else {
+              no clicks yet
+            }
+          </span>
+        </div>
+      </div>
+
+      <div class="grid main-grid" [class.loading]="stats.state().loading">
+        <section class="card">
+          <div class="card-header">
+            <h2>Clicks over time</h2>
+            <span class="hint">{{ formatDate(s.start) }} – {{ formatDate(s.end) }}, UTC days</span>
+          </div>
+          <div class="card-body chart-box tall">
+            @if (timeline(); as config) {
+              <canvas [appChart]="config" aria-label="Clicks per day"></canvas>
+            }
+          </div>
+        </section>
+
+        <section class="card qr-card">
+          <div class="card-header">
+            <h2>QR code</h2>
+          </div>
+          <div class="card-body">
+            <app-qr-code [value]="l.short_url" [fileName]="'qr-' + l.code" [size]="152" />
+            <dl class="facts">
+              <div>
+                <dt>Created</dt>
+                <dd [appTooltip]="formatDateTime(l.created_at)">{{ formatDate(l.created_at) }}</dd>
+              </div>
+              <div>
+                <dt>Expires</dt>
+                <dd>{{ l.expires_at ? formatDate(l.expires_at) : 'Never' }}</dd>
+              </div>
+              <div>
+                <dt>Code</dt>
+                <dd>{{ l.is_custom ? 'Custom alias' : 'Random code' }}</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+      </div>
+
+      <div class="grid two" [class.loading]="stats.state().loading">
+        <section class="card">
+          <div class="card-header">
+            <h2>Referrers</h2>
+            <span class="hint">where visitors came from</span>
+          </div>
+          <div class="card-body chart-box">
+            @if (referrers(); as config) {
+              <canvas [appChart]="config" aria-label="Clicks by referrer"></canvas>
+            } @else {
+              <p class="none">No clicks in this period</p>
+            }
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-header">
+            <h2>Countries</h2>
+            <span class="hint">top {{ countries().length }}</span>
+          </div>
+          <div class="card-body">
+            <app-breakdown-list [items]="countries()" [total]="s.total_clicks" />
+          </div>
+        </section>
+      </div>
+
+      <div class="grid three" [class.loading]="stats.state().loading">
+        <section class="card">
+          <div class="card-header"><h2>Devices</h2></div>
+          <div class="card-body chart-box doughnut">
+            @if (devices(); as config) {
+              <canvas [appChart]="config" aria-label="Clicks by device"></canvas>
+            } @else {
+              <p class="none">No clicks in this period</p>
+            }
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-header"><h2>Browsers</h2></div>
+          <div class="card-body chart-box doughnut">
+            @if (browsers(); as config) {
+              <canvas [appChart]="config" aria-label="Clicks by browser"></canvas>
+            } @else {
+              <p class="none">No clicks in this period</p>
+            }
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-header"><h2>Operating systems</h2></div>
+          <div class="card-body">
+            <app-breakdown-list [items]="s.operating_systems" [total]="s.total_clicks" />
+          </div>
+        </section>
+      </div>
+    } @else if (stats.state().error) {
+      <section class="card error-state" role="alert">
+        <p>{{ stats.state().error }}</p>
+        <button type="button" class="btn" (click)="stats.reload()">Try again</button>
+      </section>
+    } @else {
+      <div class="kpis">
+        @for (n of [1, 2, 3, 4]; track n) {
+          <div class="card kpi"><span class="skeleton" style="height: 56px"></span></div>
+        }
+      </div>
+      <div class="card"><span class="skeleton" style="height: 320px; margin: 20px"></span></div>
+    }
+
+    @if (editing()) {
+      <app-link-edit-dialog [link]="l" (saved)="onSaved($event)" (closed)="closeEdit()" />
+    }
+    @if (deleting()) {
+      <app-confirm-dialog
+        title="Delete this link?"
+        [message]="deleteMessage(l)"
+        confirmLabel="Delete link"
+        [busy]="busy()"
+        (confirmed)="confirmDelete(l)"
+        (cancelled)="cancelDelete()"
+      />
+    }
+  } @else {
+    <section class="card summary">
+      <div class="summary-main">
+        <span class="skeleton" style="width: 40%; height: 26px"></span>
+        <span class="skeleton" style="width: 25%; height: 16px; margin-top: 12px"></span>
+        <span class="skeleton" style="width: 55%; height: 14px; margin-top: 10px"></span>
+      </div>
+    </section>
+  }
+</div>

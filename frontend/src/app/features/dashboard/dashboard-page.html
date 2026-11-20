@@ -1,0 +1,138 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>How your short links performed over the last 30 days.</p>
+    </div>
+    <div class="page-actions">
+      <a routerLink="/links" class="btn">
+        <app-icon name="list" [size]="16" />
+        All links
+      </a>
+      <a routerLink="/new" class="btn btn-primary">
+        <app-icon name="plus" [size]="16" />
+        Shorten a link
+      </a>
+    </div>
+  </header>
+
+  @if (summary.state().error && !summary.value()) {
+    <section class="card error-state" role="alert">
+      <app-icon name="alert" [size]="24" />
+      <p>{{ summary.state().error }}</p>
+      <button type="button" class="btn" (click)="summary.reload()">Try again</button>
+    </section>
+  } @else if (summary.value(); as s) {
+    <div class="kpis">
+      <div class="card kpi">
+        <span class="label"><span class="kpi-icon"><app-icon name="link" [size]="15" /></span>Total links</span>
+        <span class="value">{{ formatNumber(s.total_links) }}</span>
+        <span class="meta">{{ s.active_links }} active</span>
+      </div>
+      <div class="card kpi">
+        <span class="label"><span class="kpi-icon teal"><app-icon name="pointer" [size]="15" /></span>Total clicks</span>
+        <span class="value">{{ compactNumber(s.total_clicks) }}</span>
+        <span class="meta">across all links</span>
+      </div>
+      <div class="card kpi">
+        <span class="label"><span class="kpi-icon amber"><app-icon name="trending" [size]="15" /></span>Clicks, last 7 days</span>
+        <span class="value">{{ formatNumber(s.clicks_last_7_days) }}</span>
+        <span class="meta">
+          @if (weekChange() !== null) {
+            <span [class.up]="weekChange()! >= 0" [class.down]="weekChange()! < 0">
+              {{ weekChange()! >= 0 ? '▲' : '▼' }} {{ abs(weekChange()!) }}%
+            </span>
+            vs the 7 days before
+          } @else {
+            no clicks the week before
+          }
+        </span>
+      </div>
+      <div class="card kpi">
+        <span class="label"><span class="kpi-icon pink"><app-icon name="bar-chart" [size]="15" /></span>Avg. clicks per link</span>
+        <span class="value">{{ formatNumber(avgPerLink()) }}</span>
+        <span class="meta">all time</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card chart-card">
+        <div class="card-header">
+          <h2>Clicks per day</h2>
+          <span class="hint">last 30 days, UTC</span>
+        </div>
+        <div class="card-body chart-box">
+          @if (chart(); as config) {
+            <canvas [appChart]="config" aria-label="Clicks per day, last 30 days"></canvas>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Top links</h2>
+          <span class="hint">by total clicks</span>
+        </div>
+        <ol class="top-links card-body">
+          @for (link of s.top_links; track link.id; let i = $index) {
+            <li>
+              <span class="rank">{{ i + 1 }}</span>
+              <div class="top-main">
+                <div class="top-line">
+                  <a [routerLink]="['/links', link.code]" class="truncate">
+                    {{ link.title || displayUrl(link.target_url) }}
+                  </a>
+                  <span class="num clicks">{{ formatNumber(link.clicks) }}</span>
+                </div>
+                <div class="bar"><span [style.width.%]="(link.clicks / topMax()) * 100"></span></div>
+              </div>
+            </li>
+          } @empty {
+            <li class="none">No clicks yet</li>
+          }
+        </ol>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Recently created</h2>
+        <a routerLink="/links" class="hint-link">View all</a>
+      </div>
+      <ul class="recent card-body">
+        @for (link of s.recent_links; track link.id) {
+          <li>
+            <div class="recent-main">
+              <a [routerLink]="['/links', link.code]" class="recent-title truncate">
+                {{ link.title || displayUrl(link.target_url) }}
+              </a>
+              <span class="recent-short">
+                <span class="mono truncate">{{ displayUrl(link.short_url) }}</span>
+                <app-copy-button [text]="link.short_url" [compact]="true" />
+              </span>
+            </div>
+            <span class="recent-meta">
+              <span class="num">{{ formatNumber(link.clicks) }} clicks</span>
+              <span class="text-muted">{{ relativeTime(link.created_at) }}</span>
+            </span>
+            <app-status-badge [status]="link.status" />
+          </li>
+        } @empty {
+          <li class="none">
+            No links yet. <a routerLink="/new">Shorten your first link</a>
+          </li>
+        }
+      </ul>
+    </section>
+  } @else {
+    <div class="kpis" aria-busy="true">
+      @for (n of [1, 2, 3, 4]; track n) {
+        <div class="card kpi"><span class="skeleton" style="height: 64px"></span></div>
+      }
+    </div>
+    <div class="grid">
+      <div class="card"><span class="skeleton" style="height: 300px; margin: 20px"></span></div>
+      <div class="card"><span class="skeleton" style="height: 300px; margin: 20px"></span></div>
+    </div>
+  }
+</div>

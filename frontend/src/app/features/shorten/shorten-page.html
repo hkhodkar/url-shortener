@@ -1,0 +1,160 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Shorten a link</h1>
+      <p>Paste a long URL, pick an alias if you like, and share the short link.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="card form-card" aria-labelledby="form-title">
+      <div class="card-header">
+        <h2 id="form-title">Link details</h2>
+      </div>
+      <form class="card-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-grid">
+          <div class="field full">
+            <label for="target_url">Long URL</label>
+            <input
+              id="target_url"
+              class="input"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              placeholder="https://example.com/a/very/long/link"
+              formControlName="target_url"
+            />
+            @if (showError('target_url')) {
+              <span class="field-error">
+                @if (form.controls.target_url.hasError('required')) {
+                  Enter the URL you want to shorten
+                } @else if (form.controls.target_url.hasError('maxlength')) {
+                  The URL is too long
+                } @else {
+                  {{ form.controls.target_url.errors?.['url'] }}
+                }
+              </span>
+            }
+          </div>
+
+          <div class="field full">
+            <label for="alias">Custom alias <span class="optional">(optional)</span></label>
+            <div class="input-addon">
+              <span class="addon" [title]="prefix()">{{ prefix() }}</span>
+              <div class="input-status">
+                <input
+                  id="alias"
+                  class="input"
+                  type="text"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  placeholder="spring-sale"
+                  [attr.maxlength]="maxAlias + 8"
+                  [class.is-invalid]="aliasState() === 'invalid'"
+                  formControlName="alias"
+                />
+                <span class="status" aria-hidden="true">
+                  @switch (aliasState()) {
+                    @case ('checking') {
+                      <span class="spinner"></span>
+                    }
+                    @case ('available') {
+                      <app-icon class="ok" name="check" [size]="18" />
+                    }
+                    @case ('invalid') {
+                      <app-icon class="bad" name="alert" [size]="18" />
+                    }
+                  }
+                </span>
+              </div>
+            </div>
+            <span class="field-hint" aria-live="polite" [class.ok]="aliasState() === 'available'">
+              @switch (aliasState()) {
+                @case ('checking') {
+                  Checking availability…
+                }
+                @case ('available') {
+                  “{{ form.controls.alias.value.trim() }}” is available
+                }
+                @case ('invalid') {
+                  <span class="field-error">{{ aliasMessage() }}</span>
+                }
+                @default {
+                  {{ minAlias }}–{{ maxAlias }} characters: letters, numbers, - and _. Leave empty
+                  for a random code.
+                }
+              }
+            </span>
+          </div>
+
+          <div class="field">
+            <label for="title">Title <span class="optional">(optional)</span></label>
+            <input
+              id="title"
+              class="input"
+              type="text"
+              maxlength="120"
+              placeholder="Spring sale landing page"
+              formControlName="title"
+            />
+          </div>
+
+          <div class="field">
+            <label for="expires_on">Expires on <span class="optional">(optional)</span></label>
+            <input
+              id="expires_on"
+              class="input"
+              type="date"
+              [min]="today"
+              formControlName="expires_on"
+            />
+            @if (showError('expires_on')) {
+              <span class="field-error">Pick today or a later date</span>
+            } @else {
+              <span class="field-hint">The link stops working after this day.</span>
+            }
+          </div>
+        </div>
+
+        @if (error()) {
+          <p class="form-error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <span class="spinner"></span>
+              Shortening…
+            } @else {
+              <app-icon name="scissors" [size]="16" />
+              Shorten link
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="result-col">
+      @if (created(); as link) {
+        <app-link-result [link]="link" (another)="startOver()" />
+      } @else {
+        <div class="card placeholder">
+          <div class="illustration" aria-hidden="true">
+            <app-icon name="link" [size]="28" />
+          </div>
+          <h2>Your short link shows up here</h2>
+          <p class="text-muted">
+            You get a copy button and a QR code you can download as PNG. Every visit is counted
+            with its referrer, country, device and browser.
+          </p>
+          <ul>
+            <li><app-icon name="check" [size]="16" /> Custom aliases, checked while you type</li>
+            <li><app-icon name="check" [size]="16" /> Optional expiry date</li>
+            <li><app-icon name="check" [size]="16" /> Click stats for 7, 30 or 90 days</li>
+          </ul>
+        </div>
+      }
+    </aside>
+  </div>
+</div>
