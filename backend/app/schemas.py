@@ -139,5 +139,12 @@ class Summary(BaseModel):
     recent_links: list[LinkRead]
 
 
+class Meta(BaseModel):
+    short_base_url: str
+    alias_min_length: int
+    alias_max_length: int
+    reserved_words: list[str]
+
+
 class ErrorBody(BaseModel):
     detail: str = Field(examples=["Link not found"])

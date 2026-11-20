@@ -64,3 +64,10 @@ def test_api_and_docs_are_not_short_links(client):
     assert client.get("/api/health").json() == {"status": "ok"}
     assert client.get("/docs").status_code == 200
     assert client.get("/openapi.json").status_code == 200
+
+
+def test_meta(client):
+    meta = client.get("/api/meta").json()
+    assert meta["short_base_url"] == "http://sho.rt"
+    assert meta["alias_min_length"] == 3
+    assert "api" in meta["reserved_words"]
