@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Databases
+*.db
+*.sqlite3
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Editors and OS
+.idea/
+.DS_Store
+.env
