@@ -1,0 +1,51 @@
+<app-demo-banner />
+
+<header class="header">
+  <div class="header-inner">
+    <a routerLink="/" class="brand" aria-label="Snip home">
+      <span class="logo"><app-icon name="scissors" [size]="18" /></span>
+      <span class="name">Snip</span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <app-icon name="dashboard" [size]="16" />
+        Dashboard
+      </a>
+      <a routerLink="/links" routerLinkActive="active">
+        <app-icon name="list" [size]="16" />
+        Links
+      </a>
+      @if (!demo.active()) {
+        <a href="/docs" target="_blank" rel="noopener" class="docs">
+          <app-icon name="external" [size]="16" />
+          API docs
+        </a>
+      }
+    </nav>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="icon-btn"
+        [attr.aria-label]="theme.theme() === 'dark' ? 'Use light theme' : 'Use dark theme'"
+        (click)="toggleTheme()"
+      >
+        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" />
+      </button>
+      <a routerLink="/new" class="btn btn-primary new-link">
+        <app-icon name="plus" [size]="16" />
+        <span>New link</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <span>Snip · a small URL shortener built with Angular and FastAPI</span>
+  <a href="https://github.com/hkhodkar/url-shortener" target="_blank" rel="noopener">Source on GitHub</a>
+</footer>

@@ -1,0 +1,286 @@
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 16px;
+
+  .full {
+    grid-column: 1 / -1;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  > label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .optional {
+    color: var(--text-subtle);
+    font-weight: 400;
+  }
+}
+
+.field-error {
+  margin-top: -2px;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: var(--text-subtle);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  &.ng-invalid.ng-touched,
+  &.is-invalid {
+    border-color: var(--danger);
+  }
+}
+
+.textarea {
+  height: auto;
+  min-height: 96px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+select.select {
+  padding-right: 36px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a93a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.input-icon {
+  position: relative;
+
+  .icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    color: var(--text-subtle);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .input {
+    padding-left: 38px;
+  }
+}
+
+.input-prefix {
+  position: relative;
+
+  > span {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    color: var(--text-muted);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .input {
+    padding-left: 28px;
+  }
+}
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+
+  label {
+    position: relative;
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  label:has(input:checked) {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+
+  label:has(input:focus-visible) {
+    outline: 2px solid var(--primary);
+  }
+}
+
+.form-error {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+fieldset.field {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  > legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+
+.field-hint {
+  margin-top: -2px;
+  font-size: 12px;
+  color: var(--text-muted);
+
+  &.ok {
+    color: var(--success);
+  }
+}
+
+.input-addon {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+
+  .addon {
+    display: flex;
+    align-items: center;
+    max-width: 55%;
+    padding: 0 10px 0 12px;
+    border: 1px solid var(--border-strong);
+    border-right: 0;
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    background: var(--surface-muted);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+}
+
+.input-status {
+  position: relative;
+
+  .input {
+    padding-right: 38px;
+  }
+
+  .status {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    display: flex;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .track {
+    position: relative;
+    flex-shrink: 0;
+    width: 38px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    transition: background 0.15s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease;
+    }
+  }
+
+  input:checked + .track {
+    background: var(--primary);
+
+    &::after {
+      transform: translateX(16px);
+    }
+  }
+
+  input:focus-visible + .track {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+// the media query comes last so it wins over the two-column grid above
+@media (max-width: 560px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
