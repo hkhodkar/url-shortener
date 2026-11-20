@@ -40,7 +40,9 @@
           <div class="field full">
             <label for="alias">Custom alias <span class="optional">(optional)</span></label>
             <div class="input-addon">
-              <span class="addon" [title]="prefix()">{{ prefix() }}</span>
+              <span class="addon" [title]="prefix()">
+                <span class="long">{{ prefix() }}</span><span class="short">{{ shortPrefix() }}</span>
+              </span>
               <div class="input-status">
                 <input
                   id="alias"

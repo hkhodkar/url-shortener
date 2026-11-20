@@ -14,6 +14,10 @@
   }
 }
 
+.addon .short {
+  display: none;
+}
+
 .status {
   color: var(--text-muted);
 
@@ -92,6 +96,16 @@
 }
 
 @media (max-width: 560px) {
+  .addon {
+    .long {
+      display: none;
+    }
+
+    .short {
+      display: inline;
+    }
+  }
+
   .form-actions .btn {
     width: 100%;
   }

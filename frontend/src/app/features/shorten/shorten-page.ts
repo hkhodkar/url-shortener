@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { catchError, of, startWith } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { apiErrorMessage } from '../../core/api/api-error';
 import { LinksApi } from '../../core/api/links.api';
 import { Link } from '../../core/models/link.models';
@@ -55,13 +55,17 @@ export class ShortenPage {
     const base = this.meta()?.short_base_url;
     return base ? `${base.replace(/^https?:\/\//, '')}/` : '…/';
   });
+  /** Shorter form for phones: only the last path segment, "…/r/". */
+  protected readonly shortPrefix = computed(() => {
+    const prefix = this.prefix();
+    const parts = prefix.split('/').filter(Boolean);
+    return parts.length > 1 ? `…/${parts.at(-1)}/` : prefix;
+  });
 
-  // re-evaluated on every status change, so the alias hint follows the async check
-  private readonly aliasStatus = toSignal(
-    this.form.controls.alias.statusChanges.pipe(startWith(this.form.controls.alias.status)),
-  );
+  // every value, status or reset event of the alias control, so the hint follows the async check
+  private readonly aliasEvents = toSignal(this.form.controls.alias.events);
   protected readonly aliasState = computed(() => {
-    this.aliasStatus();
+    this.aliasEvents();
     const control = this.form.controls.alias;
     const value = control.value.trim();
     if (!value) return 'empty';
